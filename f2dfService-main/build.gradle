@@ -1,0 +1,21 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'pl.allegro.tech.build.axion-release' version '1.13.2'
+}
+
+scmVersion {
+    repository {
+        type = 'git'
+        remote = 'origin'
+    }
+}
+
+allprojects {
+    project.version = scmVersion.version
+}
+
