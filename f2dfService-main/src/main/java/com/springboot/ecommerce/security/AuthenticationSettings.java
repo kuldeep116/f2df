@@ -43,7 +43,7 @@ public class AuthenticationSettings extends WebSecurityConfigurerAdapter {
                 .httpBasic().and()
                 .csrf().disable().authorizeRequests()
                 .antMatchers("/swagger-ui*", "/api-docs/").permitAll()
-                .antMatchers("/login*", "/register*").permitAll();
+                .antMatchers("/login*", "/register*","/api/cart/**","/api/orders/**").permitAll();
                 
     }
     @Bean

@@ -23,4 +23,6 @@ public interface ProductDao {
 	public int getCountProductByFilter(RequestProduct req);
 	public void boostProduct(Product product);
 	double getTotalValueOfAllProducts(String type);
+	List<Product> getProductsForSiteMap();
+	List<Product> getProductByName(String name);
 }

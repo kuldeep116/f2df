@@ -136,6 +136,7 @@ public class UserDaoImpl implements UserDao {
 			user.setAddress(getAddress(user.getId()));
 		} catch (NoResultException nre) {
 			// Code for handling NoResultException
+			return null;
 		} catch (NonUniqueResultException nure) {
 			// Code for handling NonUniqueResultException
 		}

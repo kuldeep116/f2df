@@ -37,6 +37,11 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
     public List<ProductCategory> getCategoryList(int page, int size,String productType) {
         return productCategoryDao.getCategories(page,size,productType).stream().distinct().collect(Collectors.toList());
     }
+    
+    @Override
+    public List<ProductCategory> getCategoryForSiteMap() {
+        return productCategoryDao.getCategoriesForSiteMap().stream().distinct().collect(Collectors.toList());
+    }
 
     @Override
     public ProductCategory findCategoryById(int id) {

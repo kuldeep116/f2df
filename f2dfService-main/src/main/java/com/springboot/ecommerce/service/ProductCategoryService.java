@@ -11,4 +11,5 @@ public interface ProductCategoryService {
     public List<ProductCategory> getCategoryList(int page, int size,String productType);
     public ProductCategory findCategoryById(int id);
     List<ProductCategory> getAllCategories();
+	List<ProductCategory> getCategoryForSiteMap();
 }

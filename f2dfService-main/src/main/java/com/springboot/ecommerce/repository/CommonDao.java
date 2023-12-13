@@ -129,4 +129,12 @@ public interface CommonDao {
 
 		public List<DeliveryAddress> getDeliveryAddress(int userId);
 
+		DeliveryAddress getAddressBasedOnId(int id);
+
+		List<News> getAllNewsForSiteMap();
+
+		List<News> getAllVideoNewsForSiteMap();
+
+		long getCountOfSaleTrans();
+
 }

@@ -32,8 +32,10 @@ import com.springboot.ecommerce.model.Images;
 import com.springboot.ecommerce.model.News;
 import com.springboot.ecommerce.pojo.ImageDTO;
 import com.springboot.ecommerce.pojo.RequestProduct;
+import com.springboot.ecommerce.pojo.ResultDTO;
 import com.springboot.ecommerce.repository.CommonDao;
 import com.springboot.ecommerce.service.HomeService;
+import com.springboot.ecommerce.service.SiteMapService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -48,6 +50,9 @@ public class NewsController {
 
 	@Autowired
 	HomeService homeService;
+	
+	@Autowired
+	private SiteMapService siteMapService;
 
 	private static Logger logger = Logger.getLogger(NewsController.class.getName());
 	private static String UPLOAD_DIR = "/home/f2df/ea-tomcat85/webapps/img/News/";
@@ -248,6 +253,12 @@ public class NewsController {
 			istrue = true;
 		}
 		return istrue;
+	}
+	
+	@GetMapping("/generate-sitemap")
+	public ResponseEntity<ResultDTO> generateSiteMap() {
+        siteMapService.generateSiteMap();
+		return ResponseEntity.ok(null);
 	}
 
 

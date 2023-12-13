@@ -546,6 +546,7 @@ public class UserController {
 			 */
 			user.setUpdateDate(new Date());
 			userService.createUser(user);
+			user.setOtp(0);
 			return generateResponse("User verify succesfully", user, HttpStatus.OK);
 		} else {
 			return generateResponse("User fail in verification ", entity, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -568,6 +569,7 @@ public class UserController {
 			user.setOtp(otp);
 			user.setUpdateDate(new Date());
 			user = userService.createUser(user);
+			user.setOtp(0);
 			if (user.getId() != 0) {
 				return generateResponse("OTP sent to your mobile number  !! ", user, HttpStatus.OK);
 			} else {
@@ -606,6 +608,7 @@ public class UserController {
 					user.setOtp(Integer.valueOf(otp));
 
 					user = userService.createUser(user);
+					user.setOtp(0);
 					return generateResponse("User already exists !! ", user, HttpStatus.OK);
 				} else {
 					User userNew = new User();
@@ -630,6 +633,7 @@ public class UserController {
 					userNew.setCreateDate(new Date());
 					userNew.setUpdateDate(new Date());
 					userNew = userService.createUser(userNew);
+					userNew.setOtp(0);
 					return generateResponse("OTP sent to your mobile number  !! ", userNew, HttpStatus.OK);
 				}
 
@@ -645,6 +649,7 @@ public class UserController {
 					userNew.setCreateDate(new Date());
 					userNew.setUpdateDate(new Date());
 					userNew = userService.createUser(userNew);
+					userNew.setOtp(0);
 					if (userNew.getId() != 0) {
 						return generateResponse("User save Succesfully !! ", userNew, HttpStatus.OK);
 					} else {

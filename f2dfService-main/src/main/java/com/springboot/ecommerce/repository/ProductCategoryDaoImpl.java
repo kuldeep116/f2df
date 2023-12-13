@@ -74,6 +74,18 @@ public class ProductCategoryDaoImpl implements ProductCategoryDao {
 					.getResultList();
 		}
 	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<ProductCategory> getCategoriesForSiteMap() {
+		Session session = sessionFactory.getCurrentSession();
+		
+			return session
+					.createQuery(
+							"from com.springboot.ecommerce.model.ProductCategory p  ORDER BY p.pc_id")
+					.getResultList();
+		
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")

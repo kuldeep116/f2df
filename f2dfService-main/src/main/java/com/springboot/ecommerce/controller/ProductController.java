@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -100,6 +101,33 @@ public class ProductController {
 		}
 		return path;
 	}
+	
+	@SuppressWarnings("resource")
+	public String savePdfOnServer(String byteCode, String path) {
+	    //byte[] pdfBytes = Base64.get.decodeBase64(byteCode);
+		 String encodedImg = byteCode.split(",")[1];
+	    byte[] pdfBytes = java.util.Base64.getDecoder().decode(encodedImg.getBytes(StandardCharsets.UTF_8));
+	    try {
+	        // Specify the path where you want to save the PDF file
+	        String fullPath = "/home/f2df/ea-tomcat85/webapps/" + path;
+	        
+	        
+
+	        // Save the PDF file
+	        try (FileOutputStream fos = new FileOutputStream(fullPath)) {
+	            fos.write(pdfBytes);
+	            fos.flush();
+	        }
+
+	        return path;
+	    } catch (FileNotFoundException e) {
+	        e.printStackTrace();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	    return null; // Return an appropriate value or throw an exception based on your application's logic
+	}
+
 
 	// Save Files
 	private final Path root = Paths.get("/img/product");
@@ -524,7 +552,7 @@ public class ProductController {
 			for (TransactionSale transObj : req) {
 				transObj.setCreateDate(timeStamp);
 				transObj.setUpdateDate(timeStamp);
-				String path = saveImageOnServer(transObj.getInvoice(),
+				String path = savePdfOnServer(transObj.getInvoice(),
 						productInvoicePath + File.separator + new Date().getTime() + ".pdf");
 				transObj.setInvoice(path);
 				TransactionSale trans = commonDao.saveBuyTransaction(transObj);
@@ -552,7 +580,7 @@ public class ProductController {
 		req.setUpdateDate(timeStamp);
 		req.setStatus("Sold");
 		try {
-			String path = saveImageOnServer(req.getInvoice(),
+			String path = savePdfOnServer(req.getInvoice(),
 					productInvoicePath + File.separator + new Date().getTime() + ".pdf");
 			req.setInvoice(path);
 			commonDao.saveSoldTransaction(req);
@@ -578,6 +606,7 @@ public class ProductController {
 		homemap.put("message", "getSaleTrans succesfully ");
 		homemap.put("status", 200);
 		homemap.put("data", commonDao.getSaleTrans(req));
+		homemap.put("size", commonDao.getCountOfSaleTrans());
 		return new ResponseEntity<Object>(homemap, HttpStatus.OK);
 	}
 

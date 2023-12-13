@@ -25,6 +25,7 @@ import com.springboot.ecommerce.model.Feedback;
 import com.springboot.ecommerce.model.Images;
 import com.springboot.ecommerce.model.MereDukan;
 import com.springboot.ecommerce.model.News;
+import com.springboot.ecommerce.model.Product;
 import com.springboot.ecommerce.model.SaleRequirement;
 import com.springboot.ecommerce.model.TrainingAttended;
 import com.springboot.ecommerce.model.Transaction;
@@ -38,6 +39,7 @@ import com.springboot.ecommerce.pojo.ReportRequest;
 import com.springboot.ecommerce.pojo.ReportUserResponse;
 import com.springboot.ecommerce.pojo.RequestProduct;
 import com.springboot.ecommerce.pojo.RequestTrans;
+import com.springboot.ecommerce.service.ProductService;
 
 @Repository
 @Transactional
@@ -45,9 +47,12 @@ public class CommonDaoImpl implements CommonDao {
 
 	@Autowired
 	SessionFactory sessionFactory;
-	
+
 	@Autowired
 	UserDao userdao;
+
+	@Autowired
+	private ProductService productService;
 
 	private static Logger logger = Logger.getLogger(CommonDaoImpl.class.getName());
 	DecimalFormat format = new DecimalFormat("##,##,##0");
@@ -95,8 +100,7 @@ public class CommonDaoImpl implements CommonDao {
 					"update com.springboot.ecommerce.model.News a set a.title =:title,a.description =:description,a.keywords=:keywords,a.altTag =:altTag,a.url=:url where a.id=:id")
 					.setParameter("title", news.getTitle()).setParameter("description", news.getDescription())
 					.setParameter("keywords", news.getKeywords()).setParameter("altTag", news.getAltTag())
-					.setParameter("url", news.getUrl())
-					.setParameter("id", news.getId()).executeUpdate();
+					.setParameter("url", news.getUrl()).setParameter("id", news.getId()).executeUpdate();
 			return news.getId();
 		} catch (Exception e) {
 			logger.debug("Error occured during update news " + e.getMessage());
@@ -119,6 +123,21 @@ public class CommonDaoImpl implements CommonDao {
 						.setParameter("newsId", newsObj.getId()).getResultList();
 				newsObj.setImages(imagesSet);
 			}
+			return news;
+		} catch (Exception e) {
+			logger.debug("Error occured during getInterestListByUser " + e.getMessage());
+			return null;
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<News> getAllNewsForSiteMap() {
+		Session session = sessionFactory.getCurrentSession();
+		try {
+			List<News> news = session
+					.createQuery("from com.springboot.ecommerce.model.News n where n.status='0' ORDER BY n.id desc")
+					.getResultList();
 			return news;
 		} catch (Exception e) {
 			logger.debug("Error occured during getInterestListByUser " + e.getMessage());
@@ -172,15 +191,13 @@ public class CommonDaoImpl implements CommonDao {
 		List<Enquiry> enquiries = new ArrayList<>();
 		try {
 			if (type.contains("All")) {
-				enquiries = session
-						.createQuery(
-								"from com.springboot.ecommerce.model.Enquiry enquiry where enquiry.product_user_id =:user_id ORDER BY enquiry.id desc")
+				enquiries = session.createQuery(
+						"from com.springboot.ecommerce.model.Enquiry enquiry where enquiry.product_user_id =:user_id ORDER BY enquiry.id desc")
 						.setParameter("user_id", userId).getResultList();
 
 			} else {
-				enquiries = session
-						.createQuery(
-								"from com.springboot.ecommerce.model.Enquiry enquiry where enquiry.type =:type and enquiry.product_user_id =:user_id ORDER BY enquiry.id desc")
+				enquiries = session.createQuery(
+						"from com.springboot.ecommerce.model.Enquiry enquiry where enquiry.type =:type and enquiry.product_user_id =:user_id ORDER BY enquiry.id desc")
 						.setParameter("type", type).setParameter("user_id", userId).getResultList();
 
 			}
@@ -198,15 +215,13 @@ public class CommonDaoImpl implements CommonDao {
 		List<Enquiry> enquiries = new ArrayList<>();
 		try {
 			if (type.contains("All")) {
-				enquiries = session
-						.createQuery(
-								"from com.springboot.ecommerce.model.Enquiry enquiry where enquiry.product_user_id =:user_id ORDER BY enquiry.id desc")
+				enquiries = session.createQuery(
+						"from com.springboot.ecommerce.model.Enquiry enquiry where enquiry.product_user_id =:user_id ORDER BY enquiry.id desc")
 						.setParameter("user_id", userId).getResultList();
 
 			} else {
-				enquiries = session
-						.createQuery(
-								"from com.springboot.ecommerce.model.Enquiry enquiry where enquiry.type =:type and enquiry.product_user_id =:user_id ORDER BY enquiry.id desc")
+				enquiries = session.createQuery(
+						"from com.springboot.ecommerce.model.Enquiry enquiry where enquiry.type =:type and enquiry.product_user_id =:user_id ORDER BY enquiry.id desc")
 						.setParameter("type", type).setParameter("user_id", userId).getResultList();
 
 			}
@@ -222,9 +237,8 @@ public class CommonDaoImpl implements CommonDao {
 		Session session = sessionFactory.getCurrentSession();
 		List<TrainingAttended> list = new ArrayList<>();
 		try {
-			list = session
-					.createQuery(
-							"from com.springboot.ecommerce.model.TrainingAttended enquiry where enquiry.user_id =:user_id ORDER BY enquiry.id desc")
+			list = session.createQuery(
+					"from com.springboot.ecommerce.model.TrainingAttended enquiry where enquiry.user_id =:user_id ORDER BY enquiry.id desc")
 					.setParameter("user_id", userId).getResultList();
 
 			return list;
@@ -239,9 +253,8 @@ public class CommonDaoImpl implements CommonDao {
 		Session session = sessionFactory.getCurrentSession();
 		MereDukan dukan = new MereDukan();
 		try {
-			return dukan = (MereDukan) session
-					.createQuery(
-							"from com.springboot.ecommerce.model.MereDukan meredukan where meredukan.dukanLink =:dukanName")
+			return dukan = (MereDukan) session.createQuery(
+					"from com.springboot.ecommerce.model.MereDukan meredukan where meredukan.dukanLink =:dukanName")
 					.setParameter("dukanName", dukanName).getSingleResult();
 		} catch (NoResultException nre) {
 
@@ -282,13 +295,44 @@ public class CommonDaoImpl implements CommonDao {
 	@Override
 	public void addSellerReq(SaleRequirement requirement) {
 		// TODO Auto-generated method stub
+		if (requirement.getProductName() != null) {
+			Product product = getProductByName(requirement.getProductName());
+			if (product != null) {
+				System.out.println("Product category ::"+product.getPc_id());
+				if (product.getProductCategory() != null)
+					requirement.setPcId(product.getProductCategory().getPc_id());
+				if (product.getSubCategory() != null)
+					requirement.setPscId(product.getSubCategory().getPsc_id());
+			}
+		}
 		Session session = sessionFactory.getCurrentSession();
+
 		session.save(requirement);
+	}
+
+	private Product getProductByName(String name) {
+		List<Product> productList = productService.getProductByName(name);
+		System.out.println("Size is ::"+productList.size());
+		if (!productList.isEmpty()) {
+			return productList.get(0);
+		}
+		return null;
+			
+		
 	}
 
 	@Override
 	public void buyerAvailablityAdd(BuyAvailablity requirement) {
 		// TODO Auto-generated method stub
+		if (requirement.getProductName() != null) {
+			Product product = getProductByName(requirement.getProductName());
+			if (product != null) {
+				if (product.getProductCategory() != null)
+					requirement.setPcId(product.getProductCategory().getPc_id());
+				if (product.getSubCategory() != null)
+					requirement.setPscId(product.getSubCategory().getPsc_id());
+			}
+		}
 		Session session = sessionFactory.getCurrentSession();
 		session.save(requirement);
 	}
@@ -298,7 +342,7 @@ public class CommonDaoImpl implements CommonDao {
 		Session session = sessionFactory.getCurrentSession();
 		try {
 			List<BuyAvailablity> list = new ArrayList<>();
-			list = session.createQuery("from com.springboot.ecommerce.model.BuyAvailablity")
+			list = session.createQuery("from com.springboot.ecommerce.model.BuyAvailablity buy order by buy.id desc")
 					.setFirstResult(req.getPageNo()).setMaxResults(req.getSize()).list();
 
 			return list;
@@ -313,12 +357,16 @@ public class CommonDaoImpl implements CommonDao {
 		Session session = sessionFactory.getCurrentSession();
 		try {
 			List<SaleRequirement> list = new ArrayList<>();
-			if(req.getPsc_id() > 0){
-				list = session.createQuery("from com.springboot.ecommerce.model.SaleRequirement  sale where sale.pscId =:pscId")
-						.setParameter("pscId", req.getPsc_id()).setFirstResult(req.getPageNo()).setMaxResults(req.getSize()).list();
-				
+			if (req.getPsc_id() > 0) {
+				list = session
+						.createQuery(
+								"from com.springboot.ecommerce.model.SaleRequirement  sale where sale.pscId =:pscId order by sale.id desc")
+						.setParameter("pscId", req.getPsc_id()).setFirstResult(req.getPageNo())
+						.setMaxResults(req.getSize()).list();
+				return list;
+
 			}
-				list = session.createQuery("from com.springboot.ecommerce.model.SaleRequirement")
+			list = session.createQuery("from com.springboot.ecommerce.model.SaleRequirement sale order by sale.id desc")
 					.setFirstResult(req.getPageNo()).setMaxResults(req.getSize()).list();
 
 			return list;
@@ -333,9 +381,8 @@ public class CommonDaoImpl implements CommonDao {
 		Session session = sessionFactory.getCurrentSession();
 		List<Enquiry> enquiries = new ArrayList<>();
 		try {
-			enquiries = session
-					.createQuery(
-							"from com.springboot.ecommerce.model.Enquiry enquiry where enquiry.type =:type and enquiry.user_id =:user_id  ORDER BY enquiry.id desc")
+			enquiries = session.createQuery(
+					"from com.springboot.ecommerce.model.Enquiry enquiry where enquiry.type =:type and enquiry.user_id =:user_id  ORDER BY enquiry.id desc")
 					.setParameter("type", type).setParameter("user_id", userId).getResultList();
 
 			return enquiries;
@@ -425,9 +472,8 @@ public class CommonDaoImpl implements CommonDao {
 		Session session = sessionFactory.getCurrentSession();
 		try {
 			@SuppressWarnings("unchecked")
-			List<News> news = session
-					.createQuery(
-							"from com.springboot.ecommerce.model.News n where n.videoLink != null and n.videoLink != '' and n.status = '0' ORDER BY n.id desc")
+			List<News> news = session.createQuery(
+					"from com.springboot.ecommerce.model.News n where n.videoLink != null and n.videoLink != '' and n.status = '0' ORDER BY n.id desc")
 					.setFirstResult(pageNo).setMaxResults(size).getResultList();
 			List<Images> imagesSet = new ArrayList<>();
 			for (News newsObj : news) {
@@ -436,6 +482,23 @@ public class CommonDaoImpl implements CommonDao {
 						.setParameter("newsId", newsObj.getId()).getResultList();
 				newsObj.setImages(imagesSet);
 			}
+			return news;
+		} catch (Exception e) {
+			logger.debug("Error occured during getInterestListByUser " + e.getMessage());
+			return null;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<News> getAllVideoNewsForSiteMap() {
+		Session session = sessionFactory.getCurrentSession();
+		try {
+			@SuppressWarnings("unchecked")
+			List<News> news = session.createQuery(
+					"from com.springboot.ecommerce.model.News n where n.videoLink != null and n.videoLink != '' and n.status = '0' ORDER BY n.id desc")
+					.getResultList();
+
 			return news;
 		} catch (Exception e) {
 			logger.debug("Error occured during getInterestListByUser " + e.getMessage());
@@ -547,19 +610,19 @@ public class CommonDaoImpl implements CommonDao {
 	@Override
 	public List<ReportUserResponse> getAllUser(ReportRequest req) {
 		List<ReportUserResponse> list = new ArrayList<ReportUserResponse>();
-		String userSql ="";
-		if(req.getType().contains("All")) {
+		String userSql = "";
+		if (req.getType().contains("All")) {
 			userSql = "SELECT u.name as userName,u.mobile as moblie,u.createDate as createDate,IF(a.city is null, '-',a.city) as city,IF(a.state is null, '-',a.state) as state,IF(a.country is null, '-',a.country) as country,IF(a.pincode is null, '-',a.pincode) as pincode,IF(m.name is null, '-',m.name) as dukanName,IF(m.dukanLink is null, '-',m.dukanLink) as dukanLink"
 					+ " FROM User u " + " left join Address a on a.userId=u.id "
 					+ " left join MereDukan m on m.userId=u.id order by u.id desc limit " + req.getPageNo() + ","
 					+ req.getSize();
-		}else {
+		} else {
 			userSql = "SELECT u.name as userName,u.mobile as moblie,u.createDate as createDate,IF(a.city is null, '-',a.city) as city,IF(a.state is null, '-',a.state) as state,IF(a.country is null, '-',a.country) as country,IF(a.pincode is null, '-',a.pincode) as pincode,IF(m.name is null, '-',m.name) as dukanName,IF(m.dukanLink is null, '-',m.dukanLink) as dukanLink"
 					+ " FROM User u " + " left join Address a on a.userId=u.id "
-					+ " left join MereDukan m on m.userId=u.id where u.userType like '%"+req.getType()+"%' order by u.id desc limit " + req.getPageNo() + ","
-					+ req.getSize();
+					+ " left join MereDukan m on m.userId=u.id where u.userType like '%" + req.getType()
+					+ "%' order by u.id desc limit " + req.getPageNo() + "," + req.getSize();
 		}
-		
+
 		Session session = sessionFactory.getCurrentSession();
 		SQLQuery query = session.createSQLQuery(userSql);
 		List<Object[]> rowsForSub = query.list();
@@ -725,9 +788,9 @@ public class CommonDaoImpl implements CommonDao {
 		} catch (NonUniqueResultException nure) {
 			// Code for handling NonUniqueResultException
 		}
-		if(user.getRole() == null){
+		if (user.getRole() == null) {
 			role = "user";
-		}else{
+		} else {
 			role = user.getRole();
 		}
 		logger.debug("User role " + role);
@@ -738,7 +801,7 @@ public class CommonDaoImpl implements CommonDao {
 	public List<ReportEnquiryResponse> getEnquiryForProducts(ReportRequest req) {
 		List<ReportEnquiryResponse> list = new ArrayList<>();
 		String sql = "";
-		
+
 		if (checkUserRole(req.getUserId()).contains("SuperAdmin")) {
 			sql = "select u.name,e.mobile,e.qunatity,p.p_name,e.createDate from Enquiry e, product p,User u "
 					+ " where e.product_id = p.p_id and e.type = 'Enquiry' and u.id = e.user_id order by e.id desc limit "
@@ -831,11 +894,13 @@ public class CommonDaoImpl implements CommonDao {
 			return 0;
 		}
 	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public int productActiveLeadCount() {
 		Session session = sessionFactory.getCurrentSession();
-		return session.createQuery("from com.springboot.ecommerce.model.Product p where p.productDesc ='Active'").list().size();
+		return session.createQuery("from com.springboot.ecommerce.model.Product p where p.productDesc ='Active'").list()
+				.size();
 	}
 
 	@Override
@@ -853,14 +918,14 @@ public class CommonDaoImpl implements CommonDao {
 	@Override
 	public TransactionSale saveBuyTransaction(TransactionSale req) {
 		Session session = sessionFactory.getCurrentSession();
-		if(req.getId() > 0){
+		if (req.getId() > 0) {
 			session.createQuery(
 					"update com.springboot.ecommerce.model.TransactionSale a  set a.status =:status where a.id=:id")
 					.setParameter("status", "Sold").setParameter("id", req.getId()).executeUpdate();
-		}else{
+		} else {
 			session.save(req);
 		}
-			return req;
+		return req;
 	}
 
 	@Override
@@ -874,19 +939,32 @@ public class CommonDaoImpl implements CommonDao {
 	public List<TransactionSaleSold> getSaleTrans(RequestTrans req) {
 		Session session = sessionFactory.getCurrentSession();
 		List<TransactionSaleSold> transSaleSold = new ArrayList<>();
-		transSaleSold = session.createQuery("from com.springboot.ecommerce.model.TransactionSaleSold u").list();
+		transSaleSold = session.createQuery("from com.springboot.ecommerce.model.TransactionSaleSold u order by id desc").setFirstResult(req.getPageNo()).setMaxResults(req.getSize()).list();
 		return transSaleSold;
 	}
+	
+	@Override
+	public long getCountOfSaleTrans() {
+	    Session session = sessionFactory.getCurrentSession();
+	    
+	    // Execute a count query to get the total number of transactions
+	    Long count = (Long) session.createQuery("select count(*) from com.springboot.ecommerce.model.TransactionSaleSold").uniqueResult();
+
+	    // Return the count (or 0 if count is null)
+	    return count != null ? count : 0;
+	}
+
 
 	@Override
 	public List<BuyAvailablity> getBuyerProductList(RequestProduct req) {
 		Session session = sessionFactory.getCurrentSession();
-		List<BuyAvailablity> list=new ArrayList<>();
+		List<BuyAvailablity> list = new ArrayList<>();
 		String query = "select p.p_id,p.p_name,u.name,SUM(pf.productFeatureValue),psc.subCategoryName,p.p_fee,u.id,u.mobile "
 				+ " from product p" + " inner join User u on u.id=p.userId"
 				+ " inner join ProductSubCategory psc on psc.psc_id=p.psc_id"
 				+ " inner join ProductFeatureValue pf on pf.p_id=p.p_id and pf.productFeatureKey like '%QUANTITY%'"
-				+ " where p.psc_id= "+req.getPsc_id() + " group by p.p_name,u.name,psc.subCategoryName,p.p_id,p.p_fee,u.id,u.mobile";
+				+ " where p.psc_id= " + req.getPsc_id()
+				+ " group by p.p_name,u.name,psc.subCategoryName,p.p_id,p.p_fee,u.id,u.mobile";
 		SQLQuery query1 = session.createSQLQuery(query);
 		List<Object[]> rowsForSub = query1.list();
 		for (Object[] obj : rowsForSub) {
@@ -897,11 +975,11 @@ public class CommonDaoImpl implements CommonDao {
 			raw.setQuantity(String.valueOf(obj[3].toString()));
 			raw.setSubCatName(String.valueOf(obj[4]));
 			raw.setOfferPrice(String.valueOf(obj[5]));
-			raw.setUserId((int)obj[6]);
+			raw.setUserId((int) obj[6]);
 			raw.setPhoneNumber(String.valueOf(obj[7]));
-			Address address=new Address();
-			address=userdao.getAddress(raw.getUserId());
-			raw.setLocation(address.getAddress1()+" "+address.getAddress2() +" "+address.getState());
+			Address address = new Address();
+			address = userdao.getAddress(raw.getUserId());
+			raw.setLocation(address.getAddress1() + " " + address.getAddress2() + " " + address.getState());
 			list.add(raw);
 		}
 		return list;
@@ -911,8 +989,9 @@ public class CommonDaoImpl implements CommonDao {
 	public List<TransactionSale> getBuyTrans(RequestTrans req) {
 		Session session = sessionFactory.getCurrentSession();
 		List<TransactionSale> transSaleBuy = new ArrayList<>();
-		transSaleBuy = session.createQuery("from com.springboot.ecommerce.model.TransactionSale u where  u.status =:status and u.mobile =:mobile ")
-					.setParameter("status", req.getStatus()).setParameter("mobile", req.getMobile()).list();
+		transSaleBuy = session.createQuery(
+				"from com.springboot.ecommerce.model.TransactionSale u where  u.status =:status and u.mobile =:mobile ")
+				.setParameter("status", req.getStatus()).setParameter("mobile", req.getMobile()).list();
 		return transSaleBuy;
 	}
 
@@ -925,13 +1004,13 @@ public class CommonDaoImpl implements CommonDao {
 	@Override
 	public List<TransactionSale> getSuccessBuyer(RequestTrans req) {
 		Session session = sessionFactory.getCurrentSession();
-		List<Integer> buyerIds=new ArrayList<>();
-		for(String s: req.getIds().split(",")){
+		List<Integer> buyerIds = new ArrayList<>();
+		for (String s : req.getIds().split(",")) {
 			buyerIds.add(Integer.valueOf(s));
 		}
 		List<TransactionSale> transSaleBuy = new ArrayList<>();
-		transSaleBuy = session.createQuery("from TransactionSale t where t.id in :ids ")
-					.setParameter("ids", buyerIds).list();
+		transSaleBuy = session.createQuery("from TransactionSale t where t.id in :ids ").setParameter("ids", buyerIds)
+				.list();
 		return transSaleBuy;
 	}
 
@@ -940,24 +1019,33 @@ public class CommonDaoImpl implements CommonDao {
 		// TODO Auto-generated method stub
 		Session session = sessionFactory.getCurrentSession();
 		try {
-			if(address.getId() != 0) {
+			if (address.getId() != 0) {
 				session.update(address);
-			}else {
+			} else {
 				session.save(address);
 			}
-			
+
 		} catch (Exception e) {
 			logger.debug("Error occured during add DeliveryAddress " + e.getMessage());
 		}
-		
+
 	}
 
 	@Override
 	public List<DeliveryAddress> getDeliveryAddress(int userId) {
 		Session session = sessionFactory.getCurrentSession();
 		List<DeliveryAddress> list = new ArrayList<>();
-		list = session.createQuery("from DeliveryAddress t where t.userId in :userId ")
-					.setParameter("userId", userId).list();
+		list = session.createQuery("from DeliveryAddress t where t.userId in :userId ").setParameter("userId", userId)
+				.list();
 		return list;
+	}
+
+	@Override
+	public DeliveryAddress getAddressBasedOnId(int id) {
+		Session session = sessionFactory.getCurrentSession();
+
+		return (DeliveryAddress) session.createQuery("from DeliveryAddress t where t.id=:id ").setParameter("id", id)
+				.getSingleResult();
+
 	}
 }

@@ -4,9 +4,28 @@ public class RequestTrans {
 
 	private String ids;
 	private String status;
+	private int pageNo;
+	private int size=20;
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		this.size = size;
+	}
+
+	public int getPageNo() {
+		return pageNo;
+	}
+
+	public void setPageNo(int pageNo) {
+		this.pageNo = pageNo;
+	}
+
 	private String startDate;
 	private String endDate;
 	private String mobile;
+	
 	
 	public String getStatus() {
 		return status;

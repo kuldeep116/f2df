@@ -36,7 +36,7 @@ public class OrderDetail {
 
 	@Column(name = "productUserId")
 	private long productUserId;
-	
+
 	@Column(name = "createDate")
 	private Date createDate;
 
@@ -114,6 +114,5 @@ public class OrderDetail {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
-
 
 }

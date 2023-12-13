@@ -51,6 +51,9 @@ public class TransactionSale {
 	@Column(name = "finalBuyerName")
 	private String finalBuyerName;
 	
+	@Column(name = "po_date")
+	private String poDate;
+	
 	public String getMobile() {
 		return mobile;
 	}
@@ -61,6 +64,14 @@ public class TransactionSale {
 
 	public String getFinalBuyerName() {
 		return finalBuyerName;
+	}
+
+	public String getPoDate() {
+		return poDate;
+	}
+
+	public void setPoDate(String poDate) {
+		this.poDate = poDate;
 	}
 
 	public void setFinalBuyerName(String finalBuyerName) {

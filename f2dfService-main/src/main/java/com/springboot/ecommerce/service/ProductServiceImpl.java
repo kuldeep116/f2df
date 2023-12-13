@@ -40,6 +40,12 @@ public class ProductServiceImpl implements ProductService {
 		return productDao.getProducts(page, size, type);
 		
 	}
+	
+	@Override
+	public List<Product> getProductListForSiteMap() {
+		return productDao.getProductsForSiteMap();
+		
+	}
 
 	@Override
 	public Product findProductById(int id) {
@@ -109,6 +115,11 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public void boostProduct(Product product) {
 		productDao.boostProduct(product);
+	}
+	
+	@Override
+	public List<Product> getProductByName(String name){
+		return productDao.getProductByName(name);
 	}
 
 }

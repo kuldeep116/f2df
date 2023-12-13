@@ -26,4 +26,6 @@ public interface ProductService {
 	public List<Product> getProductsByUser(int userId);
 	public double getTotalValueOfAllProducts(String type);
 	public void boostProduct(Product product);
+	List<Product> getProductListForSiteMap();
+	List<Product> getProductByName(String name);
 }

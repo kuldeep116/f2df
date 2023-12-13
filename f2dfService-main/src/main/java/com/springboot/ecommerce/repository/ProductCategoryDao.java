@@ -11,4 +11,5 @@ public interface ProductCategoryDao {
     public ProductCategory findCategoryById(int id);
     public List<ProductCategory> getCategories(int page,int size, String productType);
 	List<ProductCategory> getAllCategories();
+	List<ProductCategory> getCategoriesForSiteMap();
 }

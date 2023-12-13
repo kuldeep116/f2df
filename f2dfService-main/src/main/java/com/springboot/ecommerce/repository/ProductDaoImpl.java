@@ -97,9 +97,8 @@ public class ProductDaoImpl implements ProductDao {
 		Session session = sessionFactory.getCurrentSession();
 		ProductFeatureValue productValue = new ProductFeatureValue();
 		try {
-			productValue = (ProductFeatureValue) session
-					.createQuery(
-							"from com.springboot.ecommerce.model.ProductFeatureValue where productId :productId and productFeatureKey :organic ")
+			productValue = (ProductFeatureValue) session.createQuery(
+					"from com.springboot.ecommerce.model.ProductFeatureValue where productId :productId and productFeatureKey :organic ")
 					.setParameter("productId", productId).setParameter("organic", "ORGANIC").getSingleResult();
 		} catch (NoResultException nre) {
 			logger.debug("Error occrured in getProductFeatureOrganic " + nre.getMessage());
@@ -130,18 +129,28 @@ public class ProductDaoImpl implements ProductDao {
 		Session session = sessionFactory.getCurrentSession();
 		try {
 			if (type.contains("recommded")) {
-				return session
-						.createQuery(
-								"from com.springboot.ecommerce.model.Product p where p.recommended = 1 and p.productDesc='Active' ORDER BY p.p_id desc ")
+				return session.createQuery(
+						"from com.springboot.ecommerce.model.Product p where p.recommended = 1 and p.productDesc='Active' ORDER BY p.p_id desc ")
 						.setFirstResult(page).setMaxResults(size).list();
 			} else if (type.contains("bestSeller")) {
-				return session
-						.createQuery(
-								"from com.springboot.ecommerce.model.Product p where p.bestSeller = 1 and p.productDesc='Active' ORDER BY p.p_id desc ")
+				return session.createQuery(
+						"from com.springboot.ecommerce.model.Product p where p.bestSeller = 1 and p.productDesc='Active' ORDER BY p.p_id desc ")
 						.setFirstResult(page).setMaxResults(size).list();
-			} 
-				return session.createQuery("from com.springboot.ecommerce.model.Product p ORDER BY p.p_id desc ")
-						.setFirstResult(page).setMaxResults(size).list();
+			}
+			return session.createQuery("from com.springboot.ecommerce.model.Product p ORDER BY p.p_id desc ")
+					.setFirstResult(page).setMaxResults(size).list();
+		} catch (Exception e) {
+			logger.debug("Error occrured in getProductsInTheSameSubCategory " + e.getMessage());
+			return null;
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Product> getProductsForSiteMap() {
+		Session session = sessionFactory.getCurrentSession();
+		try {
+			return session.createQuery("from com.springboot.ecommerce.model.Product p ORDER BY p.p_id desc ").list();
 		} catch (Exception e) {
 			logger.debug("Error occrured in getProductsInTheSameSubCategory " + e.getMessage());
 			return null;
@@ -154,19 +163,17 @@ public class ProductDaoImpl implements ProductDao {
 		Session session = sessionFactory.getCurrentSession();
 		return session.createQuery("from com.springboot.ecommerce.model.Product p ").list().size();
 	}
-	
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Product> getBrandNamesAndCountOfProductsInTheSameSubCategory(int psc_id) {
 		Session session = sessionFactory.getCurrentSession();
 		try {
-			return session
-					.createQuery(
-							"select new com.springboot.ecommerce.pojo.BrandAndCountOfProduct(p.brandOfProduct, count(p.p_id)) "
-									+ "from com.springboot.ecommerce.model.Product p  "
-									+ "where p.subCategory.psc_id in :psc_id_temp and p.productDesc ='Active'"
-									+ "group by p.brandOfProduct  ORDER BY p.p_id desc ")
+			return session.createQuery(
+					"select new com.springboot.ecommerce.pojo.BrandAndCountOfProduct(p.brandOfProduct, count(p.p_id)) "
+							+ "from com.springboot.ecommerce.model.Product p  "
+							+ "where p.subCategory.psc_id in :psc_id_temp and p.productDesc ='Active'"
+							+ "group by p.brandOfProduct  ORDER BY p.p_id desc ")
 					.setParameter("psc_id_temp", psc_id).getResultList();
 		} catch (Exception e) {
 			logger.debug("Error occrured in getProductsInTheSameSubCategory " + e.getMessage());
@@ -180,12 +187,11 @@ public class ProductDaoImpl implements ProductDao {
 	public List<Product> getBrandNamesAndCountOfProductsInTheSameCategory(int pc_id) {
 		Session session = sessionFactory.getCurrentSession();
 		try {
-			return session
-					.createQuery(
-							"select new com.springboot.ecommerce.pojo.BrandAndCountOfProduct(p.brandOfProduct, count(p.p_id)) "
-									+ "from com.springboot.ecommerce.model.Product p  "
-									+ "where p.productCategory.pc_id in :pc_id_temp and p.productDesc ='Active' "
-									+ "group by p.brandOfProduct ORDER BY p.p_id desc")
+			return session.createQuery(
+					"select new com.springboot.ecommerce.pojo.BrandAndCountOfProduct(p.brandOfProduct, count(p.p_id)) "
+							+ "from com.springboot.ecommerce.model.Product p  "
+							+ "where p.productCategory.pc_id in :pc_id_temp and p.productDesc ='Active' "
+							+ "group by p.brandOfProduct ORDER BY p.p_id desc")
 					.setParameter("pc_id_temp", pc_id).getResultList();
 		} catch (Exception e) {
 			logger.debug("Error occrured in getProductsInTheSameSubCategory " + e.getMessage());
@@ -216,12 +222,11 @@ public class ProductDaoImpl implements ProductDao {
 			List<String> brandNameList) {
 		Session session = sessionFactory.getCurrentSession();
 		try {
-			return session
-					.createQuery("select p from com.springboot.ecommerce.model.Product p  "
-							+ "inner join com.springboot.ecommerce.model.ProductSubCategory s "
-							+ "on p.subCategory.psc_id=s.psc_id " + "where s.psc_id in :psc_id_temp "
-							+ "and p.productFee > :minCost_temp " + "and p.productFee < :maxCost_temp "
-							+ "and p.brandOfProduct in :brandNameList_temp and p.productDesc ='Active' ORDER BY p.p_id desc")
+			return session.createQuery("select p from com.springboot.ecommerce.model.Product p  "
+					+ "inner join com.springboot.ecommerce.model.ProductSubCategory s "
+					+ "on p.subCategory.psc_id=s.psc_id " + "where s.psc_id in :psc_id_temp "
+					+ "and p.productFee > :minCost_temp " + "and p.productFee < :maxCost_temp "
+					+ "and p.brandOfProduct in :brandNameList_temp and p.productDesc ='Active' ORDER BY p.p_id desc")
 					.setParameter("psc_id_temp", psc_id).setParameter("minCost_temp", minCost)
 					.setParameter("maxCost_temp", maxCost).setParameterList("brandNameList_temp", brandNameList)
 					.getResultList();
@@ -280,7 +285,8 @@ public class ProductDaoImpl implements ProductDao {
 						.createQuery(" select p from com.springboot.ecommerce.model.Product p  "
 								+ " inner join com.springboot.ecommerce.model.ProductCategory c "
 								+ " on p.productCategory.pc_id=c.pc_id " + " where c.pc_id in :pc_id_temp "
-								+ " and p.productFee > :minCost_temp " + " and p.productFee < :maxCost_temp and p.productDesc ='Active' "
+								+ " and p.productFee > :minCost_temp "
+								+ " and p.productFee < :maxCost_temp and p.productDesc ='Active' "
 								+ "ORDER BY p.p_id desc ")
 						.setParameter("pc_id_temp", req.getPc_id()).setParameter("minCost_temp", req.getMinCost())
 						.setParameter("maxCost_temp", req.getMaxCost()).setFirstResult(req.getPageNo())
@@ -290,22 +296,23 @@ public class ProductDaoImpl implements ProductDao {
 						.createQuery(" select p from com.springboot.ecommerce.model.Product p  "
 								+ " inner join com.springboot.ecommerce.model.ProductSubCategory s "
 								+ " on p.subCategory.psc_id=s.psc_id " + " where s.psc_id in :psc_id_temp "
-								+ " and p.productFee > :minCost_temp " + "and p.productFee < :maxCost_temp  and p.productDesc ='Active'"
+								+ " and p.productFee > :minCost_temp "
+								+ "and p.productFee < :maxCost_temp  and p.productDesc ='Active'"
 								+ " ORDER BY p.p_id desc ")
 						.setParameter("psc_id_temp", req.getPsc_id()).setParameter("minCost_temp", req.getMinCost())
 						.setParameter("maxCost_temp", req.getMaxCost()).setFirstResult(req.getPageNo())
 						.setMaxResults(req.getSize()).list();
 			} else {
-				productList = (List<Product>) session
-						.createQuery(" select p from com.springboot.ecommerce.model.Product p where p.productDesc ='Active' ORDER BY p.p_id desc ")
+				productList = (List<Product>) session.createQuery(
+						" select p from com.springboot.ecommerce.model.Product p where p.productDesc ='Active' ORDER BY p.p_id desc ")
 						.setFirstResult(req.getPageNo()).setMaxResults(req.getSize()).list();
 			}
 			if (req.getSearchKeyword() != null && req.getSearchKeyword() != "") {
-				productList = (List<Product>) session
-						.createQuery(
-								" select p  from com.springboot.ecommerce.model.Product p where p.productName like :productName"
-										+ " and p.productFee > :minCost_temp " + "and p.productFee < :maxCost_temp and p.productDesc ='Active' "
-										+ " ORDER BY p.p_id desc ")
+				productList = (List<Product>) session.createQuery(
+						" select p  from com.springboot.ecommerce.model.Product p where p.productName like :productName"
+								+ " and p.productFee > :minCost_temp "
+								+ "and p.productFee < :maxCost_temp and p.productDesc ='Active' "
+								+ " ORDER BY p.p_id desc ")
 						.setParameter("productName", "%" + req.getSearchKeyword() + "%")
 						.setParameter("minCost_temp", req.getMinCost()).setParameter("maxCost_temp", req.getMaxCost())
 						.setFirstResult(req.getPageNo()).setMaxResults(req.getSize()).list();
@@ -348,11 +355,10 @@ public class ProductDaoImpl implements ProductDao {
 						.list();
 			}
 			if (req.getSearchKeyword() != null && req.getSearchKeyword() != "") {
-				productList = (List<Product>) session
-						.createQuery(
-								" select p  from com.springboot.ecommerce.model.Product p where p.productName like :productName"
-										+ " and p.productFee > :minCost_temp " + "and p.productFee < :maxCost_temp "
-										+ " ORDER BY p.p_id desc ")
+				productList = (List<Product>) session.createQuery(
+						" select p  from com.springboot.ecommerce.model.Product p where p.productName like :productName"
+								+ " and p.productFee > :minCost_temp " + "and p.productFee < :maxCost_temp "
+								+ " ORDER BY p.p_id desc ")
 						.setParameter("productName", "%" + req.getSearchKeyword() + "%")
 						.setParameter("minCost_temp", req.getMinCost()).setParameter("maxCost_temp", req.getMaxCost())
 						.list();
@@ -364,15 +370,33 @@ public class ProductDaoImpl implements ProductDao {
 		}
 		return productList.size();
 	}
+	
+	@Override
+	public List<Product> getProductByName(String name)
+	{
+		Session session = sessionFactory.getCurrentSession();
+		try {
+			@SuppressWarnings("unchecked")
+			List<Product> productList = (List<Product>) session.createQuery(
+					" select p  from com.springboot.ecommerce.model.Product p where p.productName like :productName "
+							+ " ORDER BY p.p_id desc ")
+					.setParameter("productName", "%" + name + "%")
+					.list();
+			return productList;
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
+		return new ArrayList<Product>();
+	}
 
 	@Override
 	public List<Product> getProductsByUser(int userId) {
 		Session session = sessionFactory.getCurrentSession();
 		try {
 			@SuppressWarnings("unchecked")
-			List<Product> productList = session
-					.createQuery(
-							"select p from com.springboot.ecommerce.model.Product p where p.userId =:userId  ORDER BY p.p_id desc ")
+			List<Product> productList = session.createQuery(
+					"select p from com.springboot.ecommerce.model.Product p where p.userId =:userId  ORDER BY p.p_id desc ")
 					.setParameter("userId", userId).list();
 			return productList;
 		} catch (Exception e) {
@@ -385,35 +409,35 @@ public class ProductDaoImpl implements ProductDao {
 	public double getTotalValueOfAllProducts(String typeOfAction) {
 		double totalPrice = 0;
 		String sql = "";
-		if(typeOfAction.contains("BUSSDONE")){
-			sql="select pf.productFeatureKey,IF(pf.productFeatureValue is null, '0- ',pf.productFeatureValue),p.p_fee from product p "
+		if (typeOfAction.contains("BUSSDONE")) {
+			sql = "select pf.productFeatureKey,IF(pf.productFeatureValue is null, '0- ',pf.productFeatureValue),p.p_fee from product p "
 					+ " inner join ProductFeatureValue pf on pf.p_id = p.p_id and pf.productFeatureKey like '%QUANTITY%' where p.productDesc='BUSS DONE'";
-		}else if(typeOfAction.contains("ACTIVE")){
-			sql="select pf.productFeatureKey,IF(pf.productFeatureValue is null, '0- ',pf.productFeatureValue),p.p_fee from product p "
+		} else if (typeOfAction.contains("ACTIVE")) {
+			sql = "select pf.productFeatureKey,IF(pf.productFeatureValue is null, '0- ',pf.productFeatureValue),p.p_fee from product p "
 					+ " inner join ProductFeatureValue pf on pf.p_id = p.p_id and pf.productFeatureKey like '%QUANTITY%' where p.productDesc='Active'";
-		}else{
-			sql="select pf.productFeatureKey,IF(pf.productFeatureValue is null, '0- ',pf.productFeatureValue),p.p_fee from product p "
+		} else {
+			sql = "select pf.productFeatureKey,IF(pf.productFeatureValue is null, '0- ',pf.productFeatureValue),p.p_fee from product p "
 					+ " inner join ProductFeatureValue pf on pf.p_id = p.p_id and pf.productFeatureKey like '%QUANTITY%' ";
 		}
-				
+
 		Session session = sessionFactory.getCurrentSession();
 		SQLQuery query = session.createSQLQuery(sql);
 		List<Object[]> rows = query.list();
 		for (Object[] row : rows) {
 			String str = row[1].toString();
 			// str = str.replaceAll(".", "");
-			int qyt=1;
-			int price=0;
-				if (str != null && str != "" && str.contains("-")) {
-					try {
+			int qyt = 1;
+			int price = 0;
+			if (str != null && str != "" && str.contains("-")) {
+				try {
 					qyt = Integer.valueOf(str.split("-")[0].trim());
 					price = Integer.valueOf(row[2].toString().trim());
-					} catch (Exception e) {
-						logger.debug("Error occured during price count" + e.getMessage());
-					}
-					totalPrice = totalPrice + (qyt * price);
+				} catch (Exception e) {
+					logger.debug("Error occured during price count" + e.getMessage());
 				}
-			
+				totalPrice = totalPrice + (qyt * price);
+			}
+
 		}
 		return totalPrice;
 	}
@@ -427,5 +451,4 @@ public class ProductDaoImpl implements ProductDao {
 				.setParameter("p_id", product.getP_id()).executeUpdate();
 	}
 
-	
 }

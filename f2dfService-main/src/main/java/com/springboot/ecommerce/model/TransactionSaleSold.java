@@ -56,6 +56,17 @@ public class TransactionSaleSold {
 
 	@Column(name = "updateDate")
 	private String updateDate;
+	
+	@Column(name = "billing_date")
+	private String billingDate;
+
+	public String getBillingDate() {
+		return billingDate;
+	}
+
+	public void setBillingDate(String billingDate) {
+		this.billingDate = billingDate;
+	}
 
 	@Transient
 	private List<Integer> paymentList;
